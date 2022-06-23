@@ -20,22 +20,21 @@ public class TestController {
     }
 
     @PostMapping("/test")
-    public String testPost(@RequestParam("file")MultipartFile multipartFile) throws IOException{
+    public String testPost(@RequestParam("file")MultipartFile multipartFile, @RequestParam("filePath")String filePath) throws IOException{
 
         String originalFileName = multipartFile.getOriginalFilename();
-        File destination = new File("/Users/kimseojeong/Desktop/testdir/" + originalFileName);
+        File destination = new File(filePath + originalFileName);
 
         StringBuilder sb = new StringBuilder();
-
-        try{
-            String line;
+        try(
             BufferedReader br = new BufferedReader(new InputStreamReader(multipartFile.getInputStream()));
+        ){
+            String line;
             while((line = br.readLine()) != null){
                 sb.append(line);
             }
-            br.close();
-
             multipartFile.transferTo(destination);
+
         }catch(IOException e){
             return "error";
         }
