@@ -1,2 +1,6 @@
 server:
   port: 9091
+  servlet:
+    multipart:
+      maxRequestSize: 100MB
+      maxFileSize: 10MB

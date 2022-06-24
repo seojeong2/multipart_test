@@ -1,17 +1,21 @@
 package com.example.mutiparttest.Controller;
 
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import com.example.mutiparttest.domain.WavFile;
+
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import sun.jvm.hotspot.runtime.Bytes;
+
 
 import java.io.*;
+
 
 @RestController
 public class TestController {
 
+    private Logger logger = LoggerFactory.getLogger(TestController.class);
 
     @GetMapping("/test")
     public String testGet() {
@@ -19,22 +23,29 @@ public class TestController {
         return "TestGet";
     }
 
-    @PostMapping("/test")
-    public String testPost(@RequestParam("file")MultipartFile multipartFile, @RequestParam("filePath")String filePath) throws IOException{
 
-        String originalFileName = multipartFile.getOriginalFilename();
-        File destination = new File(filePath + originalFileName);
+    @PostMapping("/test")
+    public String testPost(@ModelAttribute WavFile wavFile) throws IOException{
+
+        WavFile file = new WavFile(wavFile.getFilePath(),wavFile.getFile());
+
+        String originalFileName = file.getFile().getOriginalFilename();
+        //파일 확장자
+        String extension = originalFileName.substring(originalFileName.lastIndexOf(".")+1);
+
+        logger.info("File Extension: "+extension);
+
+        File destination = new File(file.getFilePath() + originalFileName);
 
         StringBuilder sb = new StringBuilder();
         try(
-            BufferedReader br = new BufferedReader(new InputStreamReader(multipartFile.getInputStream()));
+            BufferedReader br = new BufferedReader(new InputStreamReader(file.getFile().getInputStream()));
         ){
             String line;
             while((line = br.readLine()) != null){
                 sb.append(line);
             }
-            multipartFile.transferTo(destination);
-
+            file.getFile().transferTo(destination);
         }catch(IOException e){
             return "error";
         }
